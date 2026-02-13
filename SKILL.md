@@ -1,471 +1,224 @@
----
-
-name: viper-architecture-swiftui-swift6
-description: Use when architecting complex SwiftUI applications targeting Swift 6 with strict concurrency, long-term maintenance requirements, and high testability needs. Encodes a SwiftUI-first, UIKit-free, concurrency-safe interpretation of VIPER.
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-# VIPER Architecture (SwiftUI + Swift 6)
+# SKILL.md
 
 ## Purpose
 
-This document defines a **SwiftUI-native, Swift 6–compliant** interpretation of VIPER. It deliberately **rejects UIKit-era assumptions** and encodes rules that are compatible with:
+This document defines the **binding contract** for any AI skill, agent, or code generator operating in this repository.
 
-* Swift 6 language mode
-* Strict concurrency checking
-* SwiftUI declarative rendering
-* Observation (`@Observable`)
-* Actor-based isolation
+The skill is a **constrained generator**, not an assistant or refactoring tool.
 
-This is not "classic Rambler VIPER". It is a principled evolution that preserves VIPER’s separation guarantees under modern Swift constraints.
+> Architecture is authoritative. The skill operates strictly within it.
 
 ---
 
-## Core Principles (Unchanged)
+## Architectural Authority
 
-* Single Responsibility per component
-* Explicit data flow
-* Testability by construction
-* No business logic in UI
-* No navigation logic in UI
+The following repository files are authoritative and immutable for the skill:
 
----
+* /ARCHITECTURE.md
+* /TEMPLATE.md
+* /GOLDEN_PATH.md
+* /ENFORCEMENT.md
+* /INVARIANTS.md
+* /CONTRIBUTING.md
 
-## SwiftUI-Specific Constraints
+If generated output conflicts with any of the above, the output is invalid.
 
-SwiftUI introduces the following non-negotiable realities:
-
-* Views are ephemeral `struct`s
-* View identity is not stable
-* UI updates must occur on the Main Actor
-* Navigation is state-driven, not imperative
-
-VIPER roles must adapt accordingly.
+The skill must never propose architectural changes, alternatives, optimizations, or simplifications.
 
 ---
 
-## Components and Responsibilities (Swift 6)
+## Mandatory Pre-Read Requirement
 
-### View
+Before generating any output, the skill **must**:
 
-**Form**: `struct` conforming to `View`
+1. Read this file (`SKILL.md`)
+2. Read all authoritative files listed above
+3. Treat their contents as hard constraints
 
-**Responsibilities**:
-
-* Render state
-* Emit user intent
-
-**Must NOT**:
-
-* Own business state
-* Format domain data
-* Perform navigation
-* Contain logic beyond trivial view concerns
-
-**Rules**:
-
-* No `@StateObject` or `@ObservedObject` for business state
-* No Combine usage
-* Reads state from an `@Observable` Presenter
+Failure to do so invalidates the output.
 
 ---
 
-### Presenter
+## Skill Scope
 
-**Form**: `@MainActor @Observable final class`
+### Allowed Capabilities
 
-**Responsibilities**:
+The skill may:
 
-* Own view state
-* Translate interactor output into display-ready state
-* Orchestrate user intents
+* Generate a new SwiftUI VIPER feature module using the official template
+* Apply a module name consistently across all files and types
+* Populate role skeletons with minimal placeholder logic
+* Generate simple async flows inside the Interactor
+* Add ViewState properties required by the View
+* Add Presenter formatting logic
 
-**Must NOT**:
+### Forbidden Capabilities
 
-* Perform business logic
-* Access persistence or networking directly
-* Mutate UI from background threads
+The skill must not:
 
-**Rules**:
+* Add, remove, or merge VIPER roles
+* Introduce new abstractions or layers
+* Introduce helpers outside defined roles
+* Modify template structure or file layout
+* Use UIKit or UIKit-derived concepts
+* Use `@State`, `@StateObject`, `@ObservedObject`, or `@EnvironmentObject`
+* Introduce third-party libraries
+* Introduce dependency injection frameworks
+* Refactor, optimize, or reinterpret the architecture
 
-* Single source of truth for view state
-* UI-facing mutations occur on Main Actor
-* May launch `Task`s but does not own concurrency policy
-
----
-
-### Interactor
-
-**Form**: `actor` or explicitly concurrency-safe type
-
-**Responsibilities**:
-
-* Execute use cases
-* Apply business rules
-* Coordinate domain services
-
-**Must NOT**:
-
-* Import SwiftUI
-* Mutate UI state directly
-* Perform navigation
-
-**Rules**:
-
-* Exposes async APIs
-* Communicates results back to Presenter explicitly
-* Conforms to `Sendable` contracts
+If a request cannot be satisfied within these constraints, the skill must fail explicitly.
 
 ---
 
-### Entity
+## Inputs
 
-**Form**: Plain Swift types (`struct`, `enum`)
+### Required Inputs
 
-**Responsibilities**:
+* **Module name**
 
-* Represent domain data
+  * PascalCase
+  * Used verbatim for folder name, file names, and type names
 
-**Must NOT**:
+* **Feature intent**
 
-* Contain behavior
-* Know about UI or persistence
+  * 1–2 sentences describing the responsibility of the feature
 
-**Rules**:
+### Optional Inputs
 
-* Must conform to `Sendable`
+* Initial view fields
+* Async use cases
+* Navigation intents
 
----
-
-### Router
-
-**Form**: `@MainActor @Observable final class`
-
-**Responsibilities**:
-
-* Represent navigation state
-* Act as a state machine for routing
-
-**Must NOT**:
-
-* Perform business logic
-* Render views
-
-**Rules**:
-
-* Exposes routes as enums
-* Navigation is driven by state binding
-* No imperative navigation calls
+No other inputs are permitted.
 
 ---
 
-## Canonical SwiftUI VIPER Module Layout
+## Outputs
 
-```text
-Feature/
-├── FeatureView.swift
-├── FeaturePresenter.swift
-├── FeatureInteractor.swift
-├── FeatureRouter.swift
-├── FeatureEntity.swift
-├── FeatureViewState.swift
-├── FeatureContracts.swift
-└── FeatureModule.swift
-```
+The skill must produce **exactly one feature module folder** containing **only** the following files:
 
-This structure is mandatory. Automation and review assume this layout.
+* `<Module>View.swift`
+* `<Module>Presenter.swift`
+* `<Module>Interactor.swift`
+* `<Module>Router.swift`
+* `<Module>Entity.swift`
+* `<Module>ViewState.swift`
+* `<Module>Contracts.swift`
+* `<Module>Module.swift`
+
+Rules:
+
+* No additional files
+* No missing files
+* File names must match role names exactly
+* Folder name must match the module name
 
 ---
 
-## Canonical Data Flow
+## Generation Rules
+
+Generated code must:
+
+* Compile under Swift 6
+* Use SwiftUI and Observation
+* Match the official template exactly in structure
+* Conform to all invariants and enforcement rules
+* Contain only minimal placeholder logic
+
+Generated code must not:
+
+* Perform real networking or persistence
+* Reference other feature modules by default
+* Contain example-only exceptions
+
+---
+
+## Canonical Prompt (Authoritative)
+
+All AI integrations must use the following prompt **verbatim**:
 
 ```
-User Action
- → View
- → Presenter
- → Interactor
- → Entity / Services
- → Interactor
- → Presenter (MainActor)
- → View State
- → View Render
+Before generating any output:
+- Read SKILL.md
+- Read all authoritative files listed in SKILL.md
+- Treat them as immutable constraints
+
+You are generating a SwiftUI VIPER feature module.
+
+Architecture rules:
+- SwiftUI only, no UIKit
+- Swift 6
+- Use Observation, not property wrappers
+- Exactly one View, Presenter, Interactor, Router, Entity, ViewState, Contracts, Module
+- No role merging
+- No new abstractions
+- No exceptions for examples
+
+The generated module must:
+- Match the template exactly
+- Use the provided module name consistently
+- Contain minimal placeholder logic
+- Compile without modification
+
+If a requirement cannot be satisfied within these rules, output is invalid.
 ```
 
-**Critical Rule**: Entities never reach the View directly.
+This prompt is a **contract**, not a guideline.
 
 ---
 
-## Navigation Model (SwiftUI)
+## Validation
 
-* Router exposes `route: FeatureRoute?`
-* View or Module binds navigation to router state
-* Presenter mutates router state
+AI-generated output is subject to the same validation as human-written code:
 
-Navigation is declarative and reversible.
+* Folder structure verification
+* Required file presence
+* Forbidden import checks
+* Successful compilation
 
----
+If validation fails:
 
-## Module Composition
+* The output is rejected
+* The architecture is not modified
 
-Each feature exposes a single build entry point.
-
-Responsibilities:
-
-* Instantiate and wire all VIPER components
-* Resolve circular dependencies explicitly
-* Apply environment injection if required
-
-Module composition is the only place where construction occurs.
+Rules must never be relaxed to accommodate AI output.
 
 ---
 
-## Concurrency Rules (Swift 6)
+## Versioning
 
-Mandatory:
+The skill operates against a specific architecture version.
 
-* Presenter and Router are `@MainActor`
-* Interactor is `actor` or thread-safe
-* Entities are `Sendable`
-* No UI mutation outside Main Actor
+Example:
 
-Forbidden:
-
-* Implicit thread hopping
-* Background mutation of observable state
-
----
-
-## Testing Strategy
-
-Recommended order:
-
-1. Interactor (business logic, async, no UI)
-2. Presenter (state transformation)
-3. View (snapshot or minimal rendering tests)
-
-Each layer is testable in isolation.
-
----
-
-## Anti-Patterns (SwiftUI Edition)
-
-| Anti-Pattern                 | Why It Is Invalid           |
-| ---------------------------- | --------------------------- |
-| Presenter conforms to `View` | Collapses responsibilities  |
-| Using `ObservableObject`     | Obsolete under Swift 6      |
-| Combine for state            | Unnecessary and error-prone |
-| Business logic in Presenter  | Violates VIPER              |
-| Imperative navigation        | Breaks SwiftUI model        |
-| View owns domain state       | Breaks testability          |
-
----
-
-## Acceptance Checklist (Hard Rules)
-
-A feature is NOT valid VIPER if:
-
-* Presenter is not `@MainActor`
-* Interactor is not concurrency-safe
-* View owns business state
-* Router performs logic
-* Entities reach the View
-* Navigation is not state-driven
-
----
-
-## Intended Use
-
-Use this architecture for:
-
-* Multi-feature SwiftUI apps
-* Long-lived codebases
-* Teams larger than 2 engineers
-* Projects requiring strong test isolation
-
-Avoid for:
-
-* Prototypes
-* Single-screen utilities
-* Short-lived experiments
-
----
-
-## End-to-End Example: Weather Feature
-
-This example demonstrates a complete, valid SwiftUI VIPER module that complies with all rules in this document.
-
-### ViewState
-
-```swift
-struct WeatherViewState: Sendable {
-    var temperatureText: String = "--"
-    var isLoading: Bool = false
-}
+```
+SwiftUI VIPER Architecture v1.0
 ```
 
-### View
+Any architectural change requires:
 
-```swift
-struct WeatherView: View {
-    let presenter: WeatherPresenter
-
-    var body: some View {
-        VStack {
-            if presenter.state.isLoading {
-                ProgressView()
-            } else {
-                Text(presenter.state.temperatureText)
-            }
-        }
-        .onAppear { presenter.onAppear() }
-    }
-}
-```
-
-### Presenter
-
-```swift
-@MainActor
-@Observable
-final class WeatherPresenter {
-    var state = WeatherViewState()
-
-    private let interactor: WeatherInteractorInput
-    private let router: WeatherRouter
-
-    init(interactor: WeatherInteractorInput, router: WeatherRouter) {
-        self.interactor = interactor
-        self.router = router
-    }
-
-    func onAppear() {
-        state.isLoading = true
-        Task { await interactor.loadWeather() }
-    }
-
-    func didLoadWeather(_ data: WeatherData) {
-        state.isLoading = false
-        state.temperatureText = "\(data.temperature)°"
-    }
-}
-```
-
-### Interactor
-
-```swift
-protocol WeatherInteractorInput: Sendable {
-    func loadWeather() async
-}
-
-actor WeatherInteractor: WeatherInteractorInput {
-    private let service: WeatherService
-    private let presenter: WeatherPresenter
-
-    init(service: WeatherService, presenter: WeatherPresenter) {
-        self.service = service
-        self.presenter = presenter
-    }
-
-    func loadWeather() async {
-        let data = await service.fetch()
-        await presenter.didLoadWeather(data)
-    }
-}
-```
-
-### Router
-
-```swift
-@MainActor
-@Observable
-final class WeatherRouter {
-    var route: WeatherRoute?
-}
-
-enum WeatherRoute: Sendable {
-    case details
-}
-```
-
-### Module Composition
-
-```swift
-struct WeatherModule {
-    @MainActor
-    static func build() -> some View {
-        let router = WeatherRouter()
-        let presenter = WeatherPresenter(
-            interactor: DummyWeatherInteractor(),
-            router: router
-        )
-
-        let service = WeatherService()
-        let interactor = WeatherInteractor(
-            service: service,
-            presenter: presenter
-        )
-
-        presenter.setInteractor(interactor)
-
-        return WeatherView(presenter: presenter)
-            .environment(router)
-    }
-}
-```
+* A new version identifier
+* Updated authoritative documents
+* Explicit opt-in to regeneration
 
 ---
 
-## Migration Guide: MVC / MVVM to SwiftUI VIPER
+## Non-Goals
 
-### From MVC (UIKit)
+The skill is explicitly not responsible for:
 
-**Symptoms**:
+* Teaching architecture
+* Making design decisions
+* Reducing boilerplate
+* Optimizing code
+* Enforcing runtime behavior
 
-* Massive ViewController
-* Networking and formatting mixed
-* Hard-to-test UI logic
-
-**Migration Steps**:
-
-1. Extract domain logic into an Interactor actor
-2. Convert ViewController into SwiftUI View
-3. Move formatting into Presenter
-4. Replace imperative navigation with Router state
-
-### From MVVM (SwiftUI)
-
-**Symptoms**:
-
-* ViewModel owns navigation
-* ViewModel mixes business logic
-* Difficult to test navigation flows
-
-**Migration Steps**:
-
-1. Split ViewModel into Presenter + Interactor
-2. Move navigation state into Router
-3. Convert mutable model state into ViewState
-4. Make Interactor async and Sendable
+Its sole responsibility is **correct, repeatable generation**.
 
 ---
 
-## Automation and Rejection Rules
+## Final Rule
 
-A generator, template, or AI skill MUST reject generation if:
+If the skill ever produces output that requires architectural explanation or justification, the skill has failed.
 
-* Presenter is missing `@MainActor`
-* Presenter or Router are not `@Observable`
-* Interactor is not an `actor` or thread-safe
-* View uses `@StateObject` or `@ObservedObject` for business state
-* Combine is imported
-* Navigation is triggered imperatively
-* Entities are not `Sendable`
-
-These rules are hard constraints, not guidelines.
-
----
-
-## Design Goal
-
-The goal is not ceremony.
-
-The goal is **predictability under change** in a Swift 6, SwiftUI-first world.
+Architecture remains human-owned.
